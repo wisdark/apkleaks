@@ -1,90 +1,96 @@
-## apkLeaks
+# APKLeaks
 [![version](https://badge.fury.io/gh/dwisiswant0%2fapkleaks.svg)](https://badge.fury.io/gh/dwisiswant0%2fapkleaks.svg)
 [![contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwisiswant0/apkleaks/issues)
 
 Scanning APK file for URIs, endpoints & secrets.
 
-![apkleaks PoC](https://user-images.githubusercontent.com/25837540/83319953-c3996880-a26c-11ea-982c-c20a343019db.png)
-
----
+<img src="https://user-images.githubusercontent.com/25837540/111927529-a4ade080-8ae3-11eb-800a-b764ab1242e1.jpg" alt="APKLeaks">
 
 - [Installation](#installation)
-- [Dependencies](#dependencies)
-    - [Linux](#linux)
-    - [OSX](#osx)
-    - [Windows](#windows)
+  - [from Pypi](#from-pypi)
+  - [from Source](#from-source)
+  - [from Docker](#from-docker)
 - [Usage](#usage)
-- [Version](#version)
-- [Legal](#legal)
-- [Credits and Thanks](#credits-and-thanks)
+  - [Options](#options)
+    - [Output](#output)
+    - [Pattern](#pattern)
+    - [Pattern](#pattern)
+    - [Arguments (disassembler)](#arguments-disassembler)
+- [License](#license)
+- [Acknowledments](#acknowledments)
 
 ---
 
-### Installation
+## Installation
 
-To install **apkLeaks**, simply:
+It's fairly simple to install **APKLeaks**:
 
+### from PyPi
+
+```bash
+$ pip3 install apkleaks
 ```
+
+### from Source
+
+Clone repository and install requirements:
+
+```bash
 $ git clone https://github.com/dwisiswant0/apkleaks
 $ cd apkleaks/
-$ pip install -r requirements.txt
+$ pip3 install -r requirements.txt
 ```
 
-Or download at [release](https://github.com/dwisiswant0/apkleaks/releases/) tab.
+### from Docker
+
+Pull the Docker image by running:
+
+```bash
+$ docker pull dwisiswant0/apkleaks:latest
+```
 
 ### Dependencies
 
-⚠️ This package works in Python2 _(not Python3)_.
+APKLeaks using [jadx](https://github.com/skylot/jadx) disassembler to decompile APK file. If it doesn't exist in your environment, it'll ask you to download.
 
-Install global packages:
+## Usage
 
-#### Linux
+Simply,
 
 ```bash
-$ sudo apt-get install libssl-dev swig -y
+$ apkleaks -f ~/path/to/file.apk
+# from Source
+$ python3 apkleaks.py -f ~/path/to/file.apk
+# or with Docker
+$ docker run -it --rm -v /tmp:/tmp dwisiswant0/apkleaks:latest -f /tmp/file.apk
 ```
 
-#### OSX
+## Options
 
-```
-$ brew install openssl swig
-```
+Here are all the options it supports.
 
-#### Windows
+| **Argument**  	| **Description**                             	| **Example**                                                   |
+|---------------	|---------------------------------------------	|-------------------------------------------------------------  |
+| -f, --file    	| APK file to scanning                        	| `apkleaks -f file.apk`                                        |
+| -o, --output  	| Write to file results _(random if not set)_ 	| `apkleaks -f file.apk -o results.txt`                         |
+| -p, --pattern 	| Path to custom patterns JSON                	| `apkleaks -f file.apk -p custom-rules.json`                   |
+| -a, --args    	| Disassembler arguments                      	| `apkleaks -f file.apk --args="--deobf --log-level DEBUG"`     |
+| --json        	| Save as JSON format                         	| `apkleaks -f file.apk -o results.json --json`                 |
 
-You need to install:
-
-- [OpenSSL](https://wiki.openssl.org/index.php/Binaries), and
-- [swig-win](https://sourceforge.net/projects/swig/files/).
-
-### Usage
-
-Basically,
-```
-$ python apkleaks.py -f ~/path/to/file.apk
-```
-
-#### Options
-
-```
-usage: apkleaks [-h] -f FILE [-o OUTPUT] [-p PATTERN]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -f FILE, --file FILE  APK file to scanning
-  -o OUTPUT, --output OUTPUT
-                        Write to file results (NULL will be saved into random
-                        file)
-  -p PATTERN, --pattern PATTERN
-                        Path to custom patterns JSON
-```
+### Output
 
 In general, if you don't provide `-o` argument, then it will generate results file automatically.
 
-Custom patterns can be added with the following flag `--pattern /path/to/rules.json` to provide sensitive _search rules_ in the JSON file format. For example,
+**NOTE:** By default it will also save the results in text format, use `--json` argument if you want JSON output format.
+
+### Pattern
+
+Custom patterns can be added with the following argument to provide sensitive _search rules_ in the JSON file format: `--pattern /path/to/custom-rules.json`. If not set, it'll use default patterns from [regexes.json](https://github.com/dwisiswant0/apkleaks/blob/master/config/regexes.json) file.
+
+Example patterns file:
 
 ```json
-// rules.json
+// custom-rules.json
 {
   "Amazon AWS Access Key ID": "AKIA[0-9A-Z]{16}",
   ...
@@ -92,30 +98,33 @@ Custom patterns can be added with the following flag `--pattern /path/to/rules.j
 ```
 
 ```
-$ python apkleaks.py -f /path/to/file.apk -c rules.json -o ~/Documents/apkleaks-resuts.txt
+$ apkleaks -f /path/to/file.apk -p rules.json -o ~/Documents/apkleaks-results.txt
 ```
 
-### Version
+### Arguments (disassembler)
 
-Current version is `v1.0.2`, and still development.
+We give user complete discretion to pass the disassembler arguments. For example, if you want to activate threads in `jadx` decompilation process, you can add it with `-a/--args` argument, example: `--args="--threads-count 5"`.
 
+```
+$ apkleaks -f /path/to/file.apk -a "--deobf --log-level DEBUG"
+```
 
-### Legal
+**NOTE:** Please pay attention to the default disassembler arguments we use to prevent collisions.
 
-This tool can be freely copied, modified, altered, distributed without any attribution whatsoever. However, if you feel like this tool deserves an attribution, mention it. It won't hurt anybody :)
+## License
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/dwisiswant0.svg?style=social)](https://twitter.com/dwisiswant0)
+`apkleaks` is distributed under Apache 2.
 
-Please, read the [license terms](https://github.com/dwisiswant0/apkleaks/blob/master/LICENSE). Don't worry, it can be read in less than 30 seconds, unless you have some sort of reading disability - in that case, I'm wondering why you're still reading this text. Really. Stop. Please. I mean, seriously. Why are you still reading?
+## Acknowledments
 
-
-### Credits and Thanks
-
-Since this tool includes some contributions, and I'm not an asshole, I'll publically thank the following users for their help and resource:
+Since this tool includes some contributions, and I'm not an asshole, I'll publically thank the following users for their helps and resources:
 
 - [@ndelphit](https://github.com/ndelphit) - for his inspiring `apkurlgrep`, that's why this tool was made.
 - [@dxa4481](https://github.com/dxa4481) and y'all who contribute to `truffleHogRegexes`.
 - [@GerbenJavado](https://github.com/GerbenJavado) & [@Bankde](https://github.com/Bankde) - for awesome pattern to discover URLs, endpoints & their parameters from `LinkFinder`.
 - [@tomnomnom](https://github.com/tomnomnom/gf) - a `gf` patterns.
 - [@pxb1988](https://github.com/pxb1988) - for awesome APK dissambler `dex2jar`.
-- [@ph4r05](https://github.com/ph4r05) for standalone APK parser.
+- [@subho007](https://github.com/ph4r05) for standalone APK parser.
+- `SHA2048#4361` _(Discord user)_ that help me porting code to Python3.
+- [@Ry0taK](https://github.com/Ry0taK) because he had reported an [OS command injection bug](https://github.com/dwisiswant0/apkleaks/security/advisories/GHSA-8434-v7xw-8m9x).
+- [All contributors](https://github.com/dwisiswant0/apkleaks/graphs/contributors).

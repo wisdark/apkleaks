@@ -1,4 +1,1 @@
-numpy
-mock
-m2crypto
-apk_parse_ph4
+pyaxmlparser>=0.3.24
